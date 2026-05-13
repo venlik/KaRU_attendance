@@ -84,9 +84,9 @@ if (isset($_POST['register'])) {
                 <div class="form-group">
                     <label>Password:</label><br>
                     <input type="password" id="password" name="password" required>
-                </div>;/;
+                </div>
                 <button type="submit" name="register" class="btn">Register for Verification</button>
-            </form>o
+            </form>
             <p style="text-align:center; margin-top:15px;">
                 Already registered? <a href="login.php">Login here</a>
             </p>

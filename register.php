@@ -9,7 +9,6 @@ if (isset($_POST['register'])) {
     $course     = mysqli_real_escape_string($conn, $_POST['course']);
     $password   = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-    // Check if student already exists (pending or verified)
     $check = "SELECT * FROM students WHERE reg_number='$reg_number' OR email='$email'";
     $result = $conn->query($check);
 
@@ -21,7 +20,6 @@ if (isset($_POST['register'])) {
             echo "<script>alert('Registration Number or Email already exists!');</script>";
         }
     } else {
-        // FORCE role as student, status as pending, created_by as self
         $sql = "INSERT INTO students (reg_number, fullname, email, phone, course, password, role, account_status, created_by) 
                 VALUES ('$reg_number', '$fullname', '$email', '$phone', '$course', '$password', 'student', 'pending', 'self')";
         

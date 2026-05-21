@@ -6,39 +6,51 @@
 
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
-    background-color: #f0f4f8;
-    color: #333;
+    background: linear-gradient(rgba(0, 35, 55, 0.82), rgba(0, 20, 40, 0.88)), 
+                 url('../KaRU.jpg');;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: #f0f4f8;
 }
 
 .header {
-    background: linear-gradient(135deg, #003366, #0066cc);
+    background: linear-gradient(135deg, #002244, #004488dd);
+    backdrop-filter: blur(3px);
     color: white;
     padding: 15px 20px;
     text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+    border-bottom: 1px solid #ffd70044;
 }
 
 .nav {
-    background: #003366;
+    background: #002244cc;
+    backdrop-filter: blur(4px);
     padding: 10px;
     text-align: center;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 5px;
+    gap: 8px;
+    border-bottom: 1px solid #ffd70033;
 }
 
 .nav a {
     color: white;
-    margin: 0 10px;
-    padding: 5px 0;
+    margin: 0 6px;
+    padding: 6px 18px;
     text-decoration: none;
     font-weight: bold;
-    white-space: nowrap;
+    border-radius: 40px;
+    transition: all 0.25s;
+    background: rgba(255,255,255,0.08);
 }
 
 .nav a:hover {
-    color: #ffd700;
+    background: #ffb347;
+    color: #002244;
+    transform: translateY(-2px);
 }
 
 .container {
@@ -47,38 +59,52 @@ body {
     padding: 20px;
 }
 
-.card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+.card, .auth-card {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(2px);
+    border-radius: 18px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
     padding: 30px;
     margin: 20px 0;
+    color: #1e2a3e;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid rgba(255,215,0,0.25);
 }
 
-/* Buttons now wrap properly on mobile */
+.card:hover, .auth-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 22px 40px rgba(0,0,0,0.25);
+}
+
 .btn {
     background: #0066cc;
     color: white;
     padding: 12px 25px;
     border: none;
-    border-radius: 6px;
+    border-radius: 40px;
     cursor: pointer;
     font-size: 16px;
     margin: 5px;
     display: inline-block;
     text-decoration: none;
     text-align: center;
-    white-space: nowrap;
+    transition: all 0.2s;
+    font-weight: 600;
 }
 
 .btn:hover {
-    background: #003366;
+    background: #ff8c2e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
     margin: 20px 0;
+    background: rgba(255,255,255,0.9);
+    border-radius: 16px;
+    overflow: hidden;
 }
 
 th, td {
@@ -92,57 +118,110 @@ th {
     color: white;
 }
 
-.success { color: green; font-weight: bold; }
-.danger { color: red; font-weight: bold; }
+.success { color: #2e7d32; font-weight: bold; }
+.danger { color: #c62828; font-weight: bold; }
 
-/*Mobile Fixes*/
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #002244;
+}
+
+.form-group input, .form-group textarea, .form-group select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    margin-top: 6px;
+    font-size: 15px;
+    background: #fefefe;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.filter-tab {
+    padding: 8px 20px;
+    text-decoration: none;
+    border-radius: 40px;
+    background: #eef2f7;
+    color: #002244;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.filter-tab.active {
+    background: #2980b9;
+    color: white;
+}
+
+/* Footer always at bottom */
+html, body {
+    height: 100%;
+}
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.container {
+    flex: 1;
+}
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: rgba(255,255,255,0.8);
+    font-size: 0.8rem;
+    background: rgba(0,0,0,0.5);
+    margin-top: auto;
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 10px;
         margin: 15px auto;
     }
-
-    .card {
+    .card, .auth-card {
         padding: 20px 15px;
     }
-
-    /* Buttons stack vertically and take full width on small screens */
     .btn {
         display: block;
         width: 100%;
         margin: 8px 0;
     }
-
-    /* Center any button containers */
-    .card div[style*="text-align:center"] {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-     /* Tables scroll horizontally instead of breaking  */
     table {
         display: block;
         overflow-x: auto;
         white-space: nowrap;
     }
-
     th, td {
         padding: 8px 10px;
         font-size: 14px;
     }
-
     .nav a {
         margin: 5px;
-        font-size: 14px;
+        font-size: 13px;
+        padding: 5px 12px;
     }
-
     .header h1 {
         font-size: 20px;
     }
-
     .header p {
-        font-size: 14px;
+        font-size: 13px;
     }
 }
 
@@ -150,15 +229,9 @@ th {
     .header {
         padding: 10px 15px;
     }
-
     .header h1 {
         font-size: 18px;
     }
-
-    .card {
-        padding: 15px 10px;
-    }
-
     .card h2 {
         font-size: 18px;
     }

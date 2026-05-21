@@ -32,31 +32,24 @@ $result = $conn->query($sql);
         <a href="dashboard.php">Dashboard</a>
         <a href="mark-attendance.php">Sign Attendance</a>
         <a href="view-attendance.php">My Record</a>
-        <a href="logout.php" style="color:red;">Logout</a>
+        <a href="change-password.php" style="color:#ffd700;">Change Password</a>
+        <a href="logout.php" style="color:#ffaa66;">Logout</a>
     </div>
 
     <div class="container">
         <div class="card">
             <h2>My Attendance Record</h2>
-
             <table>
-                <tr>
-                    <th>Date</th>
-                    <th>Status</th>
-                </tr>
+                <tr><th>Date</th><th>Status</th></tr>
                 <?php if ($result->num_rows > 0): ?>
                     <?php while($row = $result->fetch_assoc()): ?>
                     <tr>
                         <td><?= $row['class_date'] ?></td>
-                        <td class="<?= $row['status']=='Present' ? 'success' : 'danger' ?>">
-                            <strong><?= $row['status'] ?></strong>
-                        </td>
+                        <td class="<?= $row['status']=='Present' ? 'success' : 'danger' ?>"><strong><?= $row['status'] ?></strong></td>
                     </tr>
                     <?php endwhile; ?>
                 <?php else: ?>
-                    <tr>
-                        <td colspan="2" style="text-align:center; padding:40px;">No records yet. Sign attendance first.</td>
-                    </tr>
+                    <tr><td colspan="2" style="text-align:center; padding:40px;">No records yet. Sign attendance first.</td></tr>
                 <?php endif; ?>
             </table>
         </div>

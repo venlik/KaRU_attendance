@@ -12,7 +12,6 @@ if (isset($_POST['login'])) {
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         
-        // Check account status first
         if ($row['account_status'] === 'pending') {
             echo "<script>alert('Your account is pending verification. Please wait for a lecturer to approve it.');</script>";
         } 
@@ -25,7 +24,6 @@ if (isset($_POST['login'])) {
             $_SESSION['reg_number'] = $row['reg_number'];
             $_SESSION['role'] = $row['role'];
 
-            // Check if password change is required
             if ($row['must_change_password'] == 1) {
                 header("Location: change-password.php");
                 exit();

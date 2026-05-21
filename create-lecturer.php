@@ -1,19 +1,13 @@
 <?php
-// create-lecturer.php
-// ⚠️ RUN ONCE, THEN DELETE THIS FILE! ⚠️
-
 include 'config.php';
 
+$reg_number = 'LEC001';
+$fullname   = 'Dr. Jane Muthoni';
+$email      = 'jane.muthoni@karu.ac.ke';
+$phone      = '0700000000';
+$course     = 'Computer Science';
+$password   = 'LecSecure@2024';
 
-// EDIT THESE VALUES FOR EACH LECTURER
-$reg_number = 'LEC001';                    // Staff ID
-$fullname   = 'Dr. Jane Muthoni';          // Full name
-$email      = 'jane.muthoni@karu.ac.ke';   // Email
-$phone      = '0700000000';                // Phone
-$course     = 'Computer Science';          // Department
-$password   = 'LecSecure@2024';            // Temporary password
-
-// DO NOT EDIT BELOW THIS LINE
 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
 $sql = "INSERT INTO students (reg_number, fullname, email, phone, course, password, role, account_status, must_change_password, created_by) 
@@ -30,6 +24,5 @@ if ($conn->query($sql)) {
     echo "</div>";
 } else {
     echo "<p style='color: red;'>Error: " . $conn->error . "</p>";
-    echo "<p>Maybe this lecturer already exists?</p>";
 }
 ?>

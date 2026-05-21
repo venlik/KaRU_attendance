@@ -1,0 +1,1181 @@
+KaRU Attendance Tracker - Complete System Documentation
+Table of Contents
+
+    System Overview
+
+    System Requirements
+
+    Database Structure
+
+    File Structure
+
+    Module Documentation
+
+    User Roles and Permissions
+
+    Workflow and Processes
+
+    Security Features
+
+    Installation Guide
+
+    Troubleshooting Guide
+
+1. System Overview
+
+The KaRU Attendance Tracker is a web-based attendance management system developed for Karatina University. The system enables students to register for accounts, sign attendance for classes, and view their attendance records. Lecturers have administrative capabilities to manage student accounts, approve registrations, generate attendance reports, and oversee the entire attendance tracking process.
+
+The system uses PHP for server-side processing, MySQL for database management, and incorporates responsive HTML/CSS for a user-friendly interface across all devices including desktops, tablets, and mobile phones.
+Key Features
+
+    Student self-registration with account verification workflow
+
+    Secure login system with password encryption
+
+    Role-based access control for students and lecturers
+
+    Daily attendance signing for students
+
+    Real-time attendance reporting for lecturers
+
+    Bulk student account creation by lecturers
+
+    Student account approval/rejection system
+
+    Password change functionality with security requirements
+
+    Responsive design for all device sizes
+
+2. System Requirements
+Server Requirements
+
+    PHP version 7.4 or higher (8.x recommended)
+
+    MySQL version 5.7 or higher (8.x recommended)
+
+    Apache web server (XAMPP/WAMP/LAMP recommended)
+
+    PHP extensions: mysqli, session
+
+Client Requirements
+
+    Modern web browser (Chrome, Firefox, Safari, Edge)
+
+    JavaScript enabled
+
+    Screen resolution: 320px and above
+
+Development Environment
+
+    Local development: XAMPP, WAMP, or MAMP
+
+    Production: Any standard PHP/MySQL hosting service
+
+3. Database Structure
+Database Name: karu_attendance
+Table: students
+
+This table stores all user accounts including students and lecturers.
+Column Name	Data Type	Constraints	Description
+id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique user identifier
+reg_number	VARCHAR(50)	NOT NULL, UNIQUE	Registration number or staff ID
+fullname	VARCHAR(100)	NOT NULL	User's full name
+email	VARCHAR(100)	NOT NULL, UNIQUE	Email address
+phone	VARCHAR(15)	NOT NULL	Phone number (Kenyan format)
+course	VARCHAR(100)	NOT NULL	Course/program or department
+password	VARCHAR(255)	NOT NULL	Hashed password
+role	ENUM('student', 'lecturer')	NOT NULL, DEFAULT 'student'	User role
+account_status	ENUM('pending', 'verified', 'rejected')	NOT NULL, DEFAULT 'pending'	Registration status
+must_change_password	TINYINT(1)	NOT NULL, DEFAULT 1	Force password change on login
+created_by	VARCHAR(100)	NULL	Who created the account
+reg_date	TIMESTAMP	NOT NULL, DEFAULT CURRENT_TIMESTAMP	Registration date/time
+Table: attendance
+
+This table stores all attendance records.
+Column Name	Data Type	Constraints	Description
+id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique attendance record ID
+student_id	INT	NOT NULL, FOREIGN KEY	References students(id)
+class_date	DATE	NOT NULL	Date of the class
+status	ENUM('Present', 'Absent')	NOT NULL, DEFAULT 'Absent'	Attendance status
+Foreign Key Constraint
+sql
+
+ALTER TABLE attendance 
+ADD FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE;
+
+4. File Structure
+text
+
+karu_attendance/
+│
+├── index.html                 # Landing page / Homepage
+├── register.php               # Student registration page
+├── login.php                  # Login page for all users
+├── logout.php                 # Logout handler
+├── dashboard.php              # Student dashboard
+├── mark-attendance.php        # Student attendance signing page
+├── view-attendance.php        # Student attendance history
+├── change-password.php        # Password change page for all users
+├── lecturer-dashboard.php     # Lecturer main dashboard
+├── attendance-report.php      # Today's attendance report for lecturers
+├── all-students.php           # View all students with filters
+├── pending-approvals.php      # Approve/reject student registrations
+├── create-students.php        # Bulk student account creation
+├── create-lecturer.php        # Create lecturer account (setup only)
+├── config.php                 # Database configuration
+│
+├── css/
+│   └── style.css              # Main stylesheet
+│
+├── js/
+│   └── validation.js          # Client-side form validation
+│
+└── README.md                  # Documentation
+
+5. Module Documentation
+5.1 Configuration Module (config.php)
+
+Purpose: Establishes database connection and provides connection object to all other PHP files.
+
+Functionality:
+
+    Defines database credentials (host, username, password, database name)
+
+    Creates MySQLi connection object
+
+    Handles connection errors gracefully
+
+Dependencies: Required at the top of every PHP file that needs database access.
+
+Code Explanation:
+php
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+Creates a new MySQLi connection. If connection fails, the script terminates with an error message.
+5.2 Landing Page (index.html)
+
+Purpose: Serves as the entry point for the application, presenting users with navigation options to register or login.
+
+Components:
+
+    Header with system title and university name
+
+    Navigation bar with links to Home, Register, and Login
+
+    Authentication card with prominent buttons for registration and login
+
+    Footer with copyright information
+
+User Flow:
+
+    New users click "Student Registration" to create an account
+
+    Existing users click "Login to System" to access their dashboard
+
+    Navigation links provide alternative access to registration and login pages
+
+5.3 Registration Module (register.php)
+
+Purpose: Allows new students to create an account in the system with pending approval status.
+
+Validation Rules:
+
+    Registration Number Format: Letter followed by three digits, slash, four digits, optional letter, slash, two digits (Example: S123/0001X/24)
+
+    Email Format: Standard email format with @ and domain
+
+    Phone Number: Kenyan format starting with 01 or 07 followed by 8 digits (10 digits total)
+
+    Password Requirements:
+
+        Minimum 8 characters
+
+        At least one uppercase letter
+
+        At least one lowercase letter
+
+        At least one digit
+
+        At least one special character
+
+Workflow:
+
+    User submits registration form
+
+    Server validates input and checks for existing registration number or email
+
+    If registration number or email already exists, appropriate error message is displayed
+
+    New account is inserted with account_status = 'pending'
+
+    User receives confirmation that verification is required before login
+
+    User is redirected to login page
+
+Security:
+
+    Passwords are hashed using password_hash() before storage
+
+    Input sanitization using mysqli_real_escape_string()
+
+    JavaScript validation for immediate feedback
+
+    Server-side validation as backup
+
+5.4 Login Module (login.php)
+
+Purpose: Authenticates users and redirects them to their appropriate dashboards based on role.
+
+Login Flow:
+
+    User enters registration number and password
+
+    System queries the students table for the registration number
+
+    Account status is checked before password verification
+
+    Password verification using password_verify()
+
+    Session variables are set upon successful login
+
+    Users with must_change_password = 1 are redirected to change password page
+
+    Lecturers go to lecturer-dashboard.php
+
+    Students go to dashboard.php
+
+Account Status Handling:
+
+    pending: User sees message that account awaits verification
+
+    rejected: User sees message that registration was rejected
+
+    verified: User proceeds with login
+
+Session Variables Set:
+
+    user_id: Database ID of the user
+
+    fullname: User's full name
+
+    reg_number: Registration number or staff ID
+
+    role: Either 'student' or 'lecturer'
+
+5.5 Student Dashboard (dashboard.php)
+
+Purpose: Displays student's attendance summary and provides navigation to attendance functions.
+
+Access Control: Only users with role 'student' can access this page.
+
+Displayed Information:
+
+    Student's registration number
+
+    Total number of classes attended (based on attendance records)
+
+    Number of days present
+
+    Attendance percentage
+
+    Color-coded percentage (green for 75% and above, red for below 75%)
+
+Navigation Options:
+
+    Sign Today's Attendance button
+
+    View Full Record button
+
+    Change Password link
+
+    Logout link
+
+5.6 Mark Attendance Module (mark-attendance.php)
+
+Purpose: Allows students to sign their attendance for the current day.
+
+Workflow:
+
+    System checks if student has already signed attendance for today
+
+    If already signed, message displays that attendance has already been recorded
+
+    If not signed, student clicks the large attendance button
+
+    System creates a new attendance record with status 'Present' for today's date
+
+    Confirmation message appears and page refreshes
+
+Prevention of Multiple Submissions:
+
+    Database query checks for existing record before insertion
+
+    Students can only sign once per day
+
+5.7 View Attendance Module (view-attendance.php)
+
+Purpose: Displays complete attendance history for the logged-in student.
+
+Display Format:
+
+    Table showing date and status for each attendance record
+
+    Records ordered from newest to oldest
+
+    Status column color-coded (green for Present, red for Absent)
+
+    Empty state message when no records exist
+
+5.8 Change Password Module (change-password.php)
+
+Purpose: Allows both students and lecturers to change their passwords securely.
+
+Access Control: Requires user to be logged in (either role).
+
+Validation Checks:
+
+    Current password must match the stored password
+
+    New password must be different from current password
+
+    New password and confirm password must match
+
+    New password must be at least 6 characters
+
+Post-Change Actions:
+
+    must_change_password flag is set to 0
+
+    Success message displayed
+
+    Automatic redirect to appropriate dashboard after 2 seconds
+
+5.9 Lecturer Dashboard (lecturer-dashboard.php)
+
+Purpose: Provides lecturers with an overview of attendance statistics and pending actions.
+
+Access Control: Only users with role 'lecturer' can access.
+
+Statistics Displayed:
+
+    Total number of verified students
+
+    Number of students who signed attendance today
+
+    Number of students absent today
+
+    Number of pending student approvals
+
+    Today's overall attendance rate percentage
+
+Notification System:
+
+    Alert banner appears when pending approvals exist
+
+    Pending count badge appears on navigation tab
+
+Quick Actions:
+
+    Review Now button for pending approvals
+
+    View Full Today's Report button
+
+5.10 Attendance Report Module (attendance-report.php)
+
+Purpose: Generates a detailed report of today's attendance for all verified students.
+
+Report Components:
+
+    Summary cards showing total expected students, present count, absent count
+
+    Detailed table with student registration number, name, course, and status
+
+    Color-coded status column (green for Present, red for Absent)
+
+Data Source:
+
+    Left join between students table and attendance table
+
+    Shows 'Absent' for students without an attendance record for today
+
+5.11 All Students Module (all-students.php)
+
+Purpose: Displays all student accounts with filtering capabilities.
+
+Access Control: Lecturers only.
+
+Filter Options:
+
+    All students
+
+    Verified students only
+
+    Pending students only
+
+    Rejected students only
+
+Displayed Information:
+
+    Registration number
+
+    Full name
+
+    Email address
+
+    Phone number
+
+    Course/Program
+
+    Account status with color-coded badge
+
+    Who created the account
+
+    Registration date
+
+5.12 Pending Approvals Module (pending-approvals.php)
+
+Purpose: Allows lecturers to approve or reject student registration requests.
+
+Access Control: Lecturers only.
+
+Workflow:
+
+    Displays all students with account_status = 'pending'
+
+    Lecturer reviews each student's information
+
+    Clicking Approve sets account_status to 'verified'
+
+    Clicking Reject sets account_status to 'rejected'
+
+    Confirmation dialog before each action
+
+    Alert confirms the action and page refreshes
+
+Visual Indicators:
+
+    Warning banner showing count of pending approvals
+
+    Empty state message when no pending approvals exist
+
+5.13 Create Students Module (create-students.php)
+
+Purpose: Enables lecturers to create multiple student accounts at once in bulk.
+
+Access Control: Lecturers only.
+
+Input Format:
+
+    Course/Program for all students in the batch
+
+    Default password (students will be forced to change on first login)
+
+    CSV-formatted student list with columns: Reg Number, Full Name, Email, Phone
+
+CSV Format Example:
+text
+
+X123/4567Y/24,John Mwangi,john@example.com,0712345678
+Y987/6543P/24,Jane Wanjiku,jane@example.com,0723456789
+
+Processing Logic:
+
+    Each line is parsed using str_getcsv()
+
+    Duplicate registrations or emails are skipped
+
+    New accounts are created with account_status = 'verified'
+
+    All bulk-created accounts have must_change_password = 1
+
+    Summary of created and skipped accounts is displayed
+
+5.14 Create Lecturer Module (create-lecturer.php)
+
+Purpose: One-time setup script to create the initial lecturer account.
+
+Important Security Note: This file should be deleted after successful execution.
+
+Default Lecturer Credentials:
+
+    Staff ID: LEC001
+
+    Password: LecSecure@2024
+
+    Name: Dr. Jane Muthoni
+
+    Department: Computer Science
+
+Post-Creation: Lecturer must change password on first login.
+5.15 Logout Module (logout.php)
+
+Purpose: Terminates user session and redirects to homepage.
+
+Actions Performed:
+
+    session_start() to access current session
+
+    session_destroy() to remove all session data
+
+    Redirect to index.html
+
+5.16 Validation Module (js/validation.js)
+
+Purpose: Provides client-side form validation for the registration form.
+
+Validation Functions:
+Field	Validation Rule	Error Message
+All fields	Cannot be empty	"All fields are required!"
+Registration Number	Pattern: letter + 3 digits + / + 4 digits + optional letter + / + 2 digits	"Invalid Registration Number format! Example: S123/0001X/24"
+Email	Standard email pattern	"Please enter a valid email address!"
+Phone	Must start with 0, then 1 or 7, then 8 digits	"Phone number must be a valid Kenyan number (e.g., 0712345678)!"
+Password	8+ chars, uppercase, lowercase, digit, special char	Appropriate message based on failure
+5.17 Stylesheet Module (css/style.css)
+
+Purpose: Provides consistent styling across all pages.
+
+Key Style Components:
+
+    Responsive design with media queries for mobile devices
+
+    Glass morphism effects with backdrop filters
+
+    Hover animations on cards and buttons
+
+    Color-coded status badges
+
+    Flexbox and grid layouts for responsive components
+
+    Consistent typography and spacing
+
+    Mobile-first approach for smaller screens
+
+Breakpoints:
+
+    768px: Tablet and mobile landscape adjustments
+
+    480px: Mobile portrait adjustments
+
+6. User Roles and Permissions
+Student Role
+Action	Permission
+Register new account	Yes (with pending status)
+Login to system	Yes (after approval)
+View personal dashboard	Yes
+Sign daily attendance	Yes (once per day)
+View personal attendance history	Yes
+Change own password	Yes
+View other students' data	No
+Approve registrations	No
+Create student accounts	No
+View attendance reports	No
+Lecturer Role
+Action	Permission
+Login to system	Yes
+View lecturer dashboard	Yes
+View today's attendance report	Yes
+Create bulk student accounts	Yes
+Approve/reject student registrations	Yes
+View all students with filters	Yes
+Change own password	Yes
+Sign attendance	No (students only)
+Self-register	No (created via setup script)
+7. Workflow and Processes
+Student Registration and Approval Workflow
+text
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                     STUDENT REGISTRATION WORKFLOW                   │
+└─────────────────────────────────────────────────────────────────────┘
+
+    [Student]
+        │
+        ▼
+┌───────────────────┐
+│ Fills registration│
+│  form on register.│
+│        php        │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│  System validates │
+│  input and checks │
+│    for duplicates │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│  Account created  │
+│  with status =    │
+│    'pending'      │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ Lecturer sees     │
+│ notification on   │
+│ dashboard         │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ Lecturer reviews  │
+│ pending-approvals │
+│       .php        │
+└─────────┬─────────┘
+          │
+    ┌─────┴─────┐
+    │           │
+    ▼           ▼
+┌───────-┐  ┌──────-─┐
+│Approved│  │Rejected│
+└───┬───-┘  └───┬──-─┘
+    │           │
+    ▼           ▼
+┌───────┐  ┌───────┐
+│Student│  │Student│
+│ can   │  │ cannot│
+│ login │  │ login │
+└───────┘  └───────┘
+
+Daily Attendance Signing Workflow
+text
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                    DAILY ATTENDANCE WORKFLOW                        │
+└─────────────────────────────────────────────────────────────────────┘
+
+    [Student]
+        │
+        ▼
+┌───────────────────┐
+│ Logs into system  │
+│ (dashboard.php)   │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ Clicks "Sign      │
+│ Today's           │
+│ Attendance"       │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ System checks if  │
+│ already signed    │
+│ for today         │
+└─────────┬─────────┘
+          │
+    ┌─────┴─────┐
+    │           │
+    ▼           ▼
+┌───────┐  ┌───────────────┐
+│Already│  │Not signed yet │
+│ signed│  │               │
+└───┬───┘  └───────┬───────┘
+    │              │
+    ▼              ▼
+┌───────┐  ┌───────────────┐
+│Message│  │Clicks SIGN    │
+│says   │  │ATTENDANCE     │
+│already│  │button         │
+│signed │  └───────┬───────┘
+└───────┘          │
+                   ▼
+          ┌───────────────┐
+          │Record inserted│
+          │into attendance│
+          │table for today│
+          └───────┬───────┘
+                   │
+                   ▼
+          ┌───────────────┐
+          │Success message│
+          │displayed      │
+          └───────────────┘
+
+Lecturer Report Generation Workflow
+text
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                  LECTURER REPORT WORKFLOW                           │
+└─────────────────────────────────────────────────────────────────────┘
+
+    [Lecturer]
+        │
+        ▼
+┌───────────────────┐
+│ Logs into system  │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ Views dashboard   │
+│ with summary      │
+│ statistics        │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ Clicks "Today's   │
+│ Report" or "View  │
+│ Full Report"      │
+└─────────┬─────────┘
+          │
+          ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      attendance-report.php                          │
+│                                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │ Summary Cards: Total Students | Present | Absent            │    │
+│  └─────────────────────────────────────────────────────────────┘    │
+│                                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │ Detailed Table:                                             │    │
+│  │ Reg Number | Student Name | Course | Status                 │    │
+│  │ S123/0001X/24 | John Doe | CS | Present                     │    │
+│  │ Y987/6543P/24 | Jane Doe | CS | Absent                      │    │
+│  └─────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────┘
+
+Password Change Workflow
+text
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                     PASSWORD CHANGE WORKFLOW                        │
+└─────────────────────────────────────────────────────────────────────┘
+
+    [User]
+        │
+        ▼
+┌───────────────────┐
+│ Clicks "Change    │
+│ Password" in nav  │
+└─────────┬─────────┘
+          │
+          ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      change-password.php                            │
+│                                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │ Form Fields:                                                │    │
+│  │ - Current Password                                          │    │
+│  │ - New Password                                              │    │
+│  │ - Confirm New Password                                      │    │
+│  └─────────────────────────────────────────────────────────────┘    │
+└─────────┬───────────────────────────────────────────────────────────┘
+          │
+          ▼
+┌───────────────────┐
+│ Server validates: │
+│ - Current pass    │
+│   matches record  │
+│ - New pass !=     │
+│   current pass    │
+│ - New pass matches│
+│   confirmation    │
+│ - Min length 6    │
+└─────────┬─────────┘
+          │
+    ┌─────┴─────┐
+    │           │
+    ▼           ▼
+┌───────┐  ┌───────────────┐
+│Valid  │  │Invalid        │
+└───┬───┘  └───────┬───────┘
+    │              │
+    ▼              ▼
+┌───────┐  ┌───────────────┐
+│Update │  │Error message  │
+│password│ │displayed      │
+│in DB  │  └───────────────┘
+└───┬───┘
+    │
+    ▼
+┌───────────────────┐
+│must_change_password│
+│flag set to 0      │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│Success message    │
+│Auto-redirect to   │
+│dashboard after    │
+│2 seconds          │
+└───────────────────┘
+
+8. Security Features
+Password Security
+Feature	Implementation
+Password Hashing	PHP's password_hash() with default bcrypt algorithm
+Password Verification	password_verify() for secure comparison
+Force Password Change	must_change_password flag for new accounts
+Minimum Requirements	8+ characters, mixed case, digits, special characters
+Session Security
+Feature	Implementation
+Session Tracking	PHP native sessions
+Role Verification	Session role checked on every restricted page
+Session Destruction	session_destroy() on logout
+Input Validation
+Type	Method
+Client-side	JavaScript validation in validation.js
+Server-side	PHP validation with mysqli_real_escape_string()
+SQL Injection Protection	Escaping user inputs before queries
+Account Security
+Feature	Implementation
+Account Status	pending → verified/rejected workflow
+Duplicate Prevention	Registration number and email uniqueness enforced
+Login Attempts	No notification of which field was incorrect
+9. Installation Guide
+Step 1: Set Up Local Server Environment
+
+If using XAMPP:
+
+    Download and install XAMPP from https://www.apachefriends.org/
+
+    Launch XAMPP Control Panel
+
+    Start Apache and MySQL services
+
+Step 2: Create Project Directory
+
+Navigate to your web server's root directory:
+
+    XAMPP: C:\xampp\htdocs\
+
+    WAMP: C:\wamp\www\
+
+    MAMP: /Applications/MAMP/htdocs/
+
+Create a new folder named karu_attendance
+Step 3: Copy All Files
+
+Copy all provided PHP, HTML, CSS, and JS files into the karu_attendance folder maintaining the folder structure:
+text
+
+karu_attendance/
+├── css/
+│   └── style.css
+├── js/
+│   └── validation.js
+└── [all PHP and HTML files]
+
+Step 4: Create Database
+
+    Open phpMyAdmin by navigating to http://localhost/phpmyadmin
+
+    Click "New" to create a database
+
+    Database name: karu_attendance
+
+    Choose "utf8mb4_general_ci" as collation
+
+    Click "Create"
+
+Step 5: Create Tables
+
+Run the following SQL queries in phpMyAdmin SQL tab:
+
+Students Table:
+sql
+
+CREATE TABLE students (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    reg_number VARCHAR(50) NOT NULL UNIQUE,
+    fullname VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    phone VARCHAR(15) NOT NULL,
+    course VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('student', 'lecturer') NOT NULL DEFAULT 'student',
+    account_status ENUM('pending', 'verified', 'rejected') NOT NULL DEFAULT 'pending',
+    must_change_password TINYINT(1) NOT NULL DEFAULT 1,
+    created_by VARCHAR(100) DEFAULT NULL,
+    reg_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+Attendance Table:
+sql
+
+CREATE TABLE attendance (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    class_date DATE NOT NULL,
+    status ENUM('Present', 'Absent') NOT NULL DEFAULT 'Absent',
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+);
+
+Step 6: Configure Database Connection
+
+Open config.php and verify/update database credentials:
+php
+
+$servername = "localhost";
+$username = "root";
+$password = "root";
+$dbname = "karu_attendance";
+
+Note: For XAMPP default installation, password is often empty string "" instead of "root". Adjust according to your setup.
+Step 7: Create Lecturer Account
+
+    Navigate to http://localhost/karu_attendance/create-lecturer.php
+
+    Verify the account was created successfully
+
+    IMMEDIATELY DELETE the create-lecturer.php file for security
+
+Step 8: Test the System
+
+    Access the homepage: http://localhost/karu_attendance/index.html
+
+    Test student registration
+
+    Login as lecturer using Staff ID: LEC001 and password: LecSecure@2024
+
+    Approve the test student registration
+
+    Login as student to test attendance signing
+
+Step 9: Verify File Permissions
+
+Ensure the following directories have proper read/write permissions:
+
+    No files require write permissions (no file uploads)
+
+    CSS and JS folders need read access
+
+10. Troubleshooting Guide
+Common Issues and Solutions
+Issue	Possible Cause	Solution
+"Connection failed" error	Incorrect database credentials	Verify config.php credentials match MySQL settings
+Blank white page	PHP syntax error or missing file	Check error logs, enable PHP error reporting
+404 Not Found	File path incorrect	Verify file structure matches installation guide
+Registration fails validation	Incorrect input format	Follow exact format: S123/0001X/24 for reg number, 0712345678 for phone
+Cannot login after registration	Account still pending	Lecturer must approve account in pending-approvals.php
+Password change redirect loop	must_change_password not clearing	Check database field is being updated to 0
+Attendance button shows already signed	Duplicate submission	Student can only sign once per day
+Lecturer dashboard shows 0 students	No verified students	Approve pending students or create using create-students.php
+CSS not loading	Incorrect CSS path	Ensure style.css is in css/ folder relative to root
+JavaScript validation not working	validation.js path incorrect	Ensure file is in js/ folder
+Debugging Tips
+
+Enable PHP Error Reporting:
+Add these lines to the top of any PHP file for debugging:
+php
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+Check Database Queries:
+Add this after a query to see errors:
+php
+
+if (!$result) {
+    die("Query failed: " . $conn->error);
+}
+
+View Session Data:
+Add this temporarily to see session contents:
+php
+
+echo "<pre>";
+print_r($_SESSION);
+echo "</pre>";
+
+Browser Developer Tools:
+
+    Press F12 to open developer tools
+
+    Check Console tab for JavaScript errors
+
+    Check Network tab for failed resource loads
+
+    Check Elements tab for CSS issues
+
+Support Resources
+Resource	Location
+PHP Documentation	https://www.php.net/docs.php
+MySQL Documentation	https://dev.mysql.com/doc/
+XAMPP Support	https://www.apachefriends.org/faq.html
+Regular Expression Testing	https://regex101.com/
+Appendix A: Registration Number Format
+
+The system expects registration numbers to follow this pattern:
+
+Pattern: Letter + 3 digits + / + 4 digits + optional letter + / + 2 digits
+
+Valid Examples:
+
+    S123/0001X/24
+
+    Y987/6543P/21
+
+    C001/2345/23
+
+Invalid Examples:
+
+    123/4567/24 (missing leading letter)
+
+    S12/4567/24 (only 2 digits after letter)
+
+    S123/456/24 (only 3 digits before optional letter)
+
+    S123/4567/244 (3 digits at end instead of 2)
+
+Regular Expression Used:
+regex
+
+/^[a-zA-Z]\d{3}\/\d{4}[a-zA-Z]?\/\d{2}$/
+
+Appendix B: Phone Number Format
+
+Kenyan phone numbers must follow this format:
+
+Pattern: Start with 0, then either 1 or 7, then exactly 8 digits
+
+Valid Examples:
+
+    0712345678
+
+    0723456789
+
+    0112345678
+
+Invalid Examples:
+
+    712345678 (missing leading 0)
+
+    071234567 (only 9 digits)
+
+    0812345678 (starts with 08, not 01 or 07)
+
+Regular Expression Used:
+regex
+
+/^0[17]\d{8}$/
+
+Appendix C: Password Requirements
+
+Student passwords during registration must meet:
+Requirement	Description
+Minimum Length	At least 8 characters
+Uppercase	At least one uppercase letter (A-Z)
+Lowercase	At least one lowercase letter (a-z)
+Digit	At least one number (0-9)
+Special Character	At least one non-alphanumeric character (!@#$%^&* etc.)
+
+Strong Password Examples:
+
+    KaruStudent@2024
+
+    Pass#123Word
+
+    Secure!24Karu
+
+Weak Password Examples (will be rejected):
+
+    password123 (no uppercase or special character)
+
+    PASSWORD123 (no lowercase or special character)
+
+    Pass123 (too short, no special character)
+
+Regular Expression Used:
+regex
+
+/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/
+
+Appendix D: CSV Format for Bulk Student Creation
+
+When using create-students.php, the CSV format requires:
+
+Column Order:
+
+    Registration Number
+
+    Full Name
+
+    Email Address
+
+    Phone Number
+
+Format Rules:
+
+    One student per line
+
+    Commas separate fields
+
+    No spaces after commas
+
+    No header row (start directly with data)
+
+Example CSV Data:
+text
+
+X123/4567Y/24,John Mwangi,john.mwangi@student.karu.ac.ke,0712345678
+Y987/6543P/24,Jane Wanjiku,jane.wanjiku@student.karu.ac.ke,0723456789
+Z456/7890Q/24,Peter Kamau,peter.kamau@student.karu.ac.ke,0734567890
+
+Excel Export Tips:
+
+    Create columns: Reg Number, Full Name, Email, Phone
+
+    Fill rows with student data
+
+    Save as CSV (Comma delimited)
+
+    Open CSV in text editor to verify format
+
+    Copy and paste into the textarea
+
+Appendix E: Database Maintenance
+Backup Database
+
+Using phpMyAdmin:
+
+    Go to http://localhost/phpmyadmin
+
+    Select karu_attendance database
+
+    Click "Export" tab
+
+    Choose "Quick" method
+
+    Click "Go" to download SQL backup
+
+Using MySQL Command Line:
+bash
+
+mysqldump -u root -p karu_attendance > backup.sql
+
+Clear All Attendance Records
+sql
+
+TRUNCATE TABLE attendance;
+
+Reset All Student Passwords
+sql
+
+UPDATE students SET password = '$2y$10$YourHashedPasswordHere', must_change_password = 1 WHERE role = 'student';
+
+View Attendance Statistics
+sql
+
+SELECT 
+    DATE(class_date) as date,
+    COUNT(*) as total_signed,
+    COUNT(CASE WHEN status = 'Present' THEN 1 END) as present_count
+FROM attendance 
+GROUP BY DATE(class_date)
+ORDER BY date DESC;
+
+Documentation Version: 1.0
+Last Updated: 2024
+System Name: KaRU Attendance Tracker
+Institution: Karatina University
+
+End of Documentation

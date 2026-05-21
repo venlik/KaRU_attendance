@@ -3,8 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KaRU Attendance Portal</title>
+    <title>KaRU Attendance Portal | Karatina University</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Ensure footer stays at bottom */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            flex: 1;
+        }
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.8rem;
+            background: rgba(0,0,0,0.5);
+            margin-top: auto;
+        }
+    </style>
 </head>
 <body>
     <div class="header">
@@ -19,17 +43,19 @@
     </div>
 
     <div class="container">
-        <div class="card">
-            <h2>Welcome to KaRU Attendance System</h2>
-            <p style="text-align:center; font-size:18px; margin:25px 0;">
-                Local Attendance Management System for Lecturers and Students
-            </p>
-            
-            <div style="text-align:center; margin:40px 0;">
-                <a href="register.php" class="btn">Student Registration</a>
-                <a href="login.php" class="btn">Login to System</a>
+        <div class="auth-card">
+            <h2>📚 Welcome to KaRU</h2>
+            <p>Access your attendance dashboard — Lecturers & Students</p>
+            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin: 1.5rem 0 0.5rem;">
+                <a href="register.php" class="btn">📝 Student Registration</a>
+                <a href="login.php" class="btn">🔐 Login to System</a>
             </div>
+            <div style="margin-top: 20px; font-size: 0.85rem; color: #2c6e9e;">⚡ Real-time attendance | Verified records | Lecturer approvals</div>
         </div>
     </div>
+
+    <footer>
+        KaRU Attendance Portal | Karatina University — Track attendance, empower education
+    </footer>
 </body>
 </html>

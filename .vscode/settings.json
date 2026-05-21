@@ -14,6 +14,21 @@
             "database": "karu_attendance",
             "username": "root",
             "password": "root"
+        },
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MariaDB",
+            "name": "DEV-sql",
+            "username": "root",
+            "database": "karu_attendance",
+            "askForPassword": true
         }
     ]
 }

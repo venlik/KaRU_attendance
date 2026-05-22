@@ -1,5 +1,5 @@
-<?php 
-include 'config.php'; 
+<?php
+include 'config.php';
 session_start();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'lecturer') {
@@ -17,7 +17,7 @@ $pending_count = $conn->query("SELECT COUNT(*) as count FROM students WHERE acco
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,29 +34,59 @@ $pending_count = $conn->query("SELECT COUNT(*) as count FROM students WHERE acco
             animation: pulse 2s infinite;
         }
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
+
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
+
         .stat-card {
             text-align: center;
             padding: 25px;
             border-radius: 10px;
             color: white;
         }
-        .stat-card.blue { background: linear-gradient(135deg, #2980b9, #3498db); }
-        .stat-card.green { background: linear-gradient(135deg, #27ae60, #2ecc71); }
-        .stat-card.red { background: linear-gradient(135deg, #c0392b, #e74c3c); }
-        .stat-card.orange { background: linear-gradient(135deg, #e67e22, #f39c12); }
-        .stat-card h2 { font-size: 48px; margin: 10px 0; }
-        .stat-card p { font-size: 16px; opacity: 0.9; }
+
+        .stat-card.blue {
+            background: linear-gradient(135deg, #2980b9, #3498db);
+        }
+
+        .stat-card.green {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .stat-card.red {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+        }
+
+        .stat-card.orange {
+            background: linear-gradient(135deg, #e67e22, #f39c12);
+        }
+
+        .stat-card h2 {
+            font-size: 48px;
+            margin: 10px 0;
+        }
+
+        .stat-card p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>KaRU Attendance Tracker</h1>
@@ -75,26 +105,44 @@ $pending_count = $conn->query("SELECT COUNT(*) as count FROM students WHERE acco
 
     <div class="container">
         <?php if ($pending_count > 0): ?>
-        <div style="background: #fff3cd; border: 2px solid #f39c12; border-radius: 10px; padding: 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
-            <div>
-                <h3 style="color: #856404; margin: 0;">⚠️ Pending Student Approvals</h3>
-                <p style="margin: 5px 0 0 0;">There are <strong><?= $pending_count ?> student(s)</strong> waiting for verification.</p>
+            <div
+                style="background: #fff3cd; border: 2px solid #f39c12; border-radius: 10px; padding: 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <h3 style="color: #856404; margin: 0;">⚠️ Pending Student Approvals</h3>
+                    <p style="margin: 5px 0 0 0;color: #2ecc71">There are <strong><?= $pending_count ?> student(s)</strong> waiting for
+                        verification.</p>
+                </div>
+                <a href="pending-approvals.php" class="btn" style="background: #f39c12; font-size: 18px;">Review Now →</a>
             </div>
-            <a href="pending-approvals.php" class="btn" style="background: #f39c12; font-size: 18px;">Review Now →</a>
-        </div>
         <?php endif; ?>
 
         <div class="dashboard-grid">
-            <div class="stat-card blue"><p>Total Students</p><h2><?= $total_students ?></h2></div>
-            <div class="stat-card green"><p>Signed In Today</p><h2><?= $signed_today ?></h2></div>
-            <div class="stat-card red"><p>Absent Today</p><h2><?= $absent_today ?></h2></div>
-            <div class="stat-card orange"><p>Pending Approvals</p><h2><?= $pending_count ?></h2></div>
+            <div class="stat-card blue">
+                <p>Total Students</p>
+                <h2><?= $total_students ?></h2>
+            </div>
+            <div class="stat-card green">
+                <p>Signed In Today</p>
+                <h2><?= $signed_today ?></h2>
+            </div>
+            <div class="stat-card red">
+                <p>Absent Today</p>
+                <h2><?= $absent_today ?></h2>
+            </div>
+            <div class="stat-card orange">
+                <p>Pending Approvals</p>
+                <h2><?= $pending_count ?></h2>
+            </div>
         </div>
 
         <div class="card" style="text-align:center; margin-top:30px;">
-            <p style="font-size:18px;"><strong>Today:</strong> <?= date('d M, Y') ?> | Attendance Rate: <span class="<?= $total_students > 0 && ($signed_today/$total_students)*100 >= 75 ? 'success' : 'danger' ?>"><?= $total_students > 0 ? round(($signed_today / $total_students) * 100, 1) : 0 ?>%</span></p>
-            <a href="attendance-report.php" class="btn" style="font-size:18px; padding:15px 40px; margin-top:20px;">View Full Today's Report</a>
+            <p style="font-size:18px;"><strong>Today:</strong> <?= date('d M, Y') ?> | Attendance Rate: <span
+                    class="<?= $total_students > 0 && ($signed_today / $total_students) * 100 >= 75 ? 'success' : 'danger' ?>"><?= $total_students > 0 ? round(($signed_today / $total_students) * 100, 1) : 0 ?>%</span>
+            </p>
+            <a href="attendance-report.php" class="btn" style="font-size:18px; padding:15px 40px; margin-top:20px;">View
+                Full Today's Report</a>
         </div>
     </div>
 </body>
+
 </html>
